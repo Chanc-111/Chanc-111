@@ -1,39 +1,52 @@
+%%{init: {"theme":"base","themeVariables":{"background":"#0b1220","primaryColor":"#172b45","primaryTextColor":"#f8fafc","primaryBorderColor":"#60a5fa","lineColor":"#facc15","secondaryColor":"#182235","tertiaryColor":"#202b3d","clusterBkg":"#111c2e","clusterBorder":"#64748b","edgeLabelBackground":"#263449","fontFamily":"Arial","fontSize":"15px"},"flowchart":{"curve":"basis","htmlLabels":true,"nodeSpacing":38,"rankSpacing":48}}}%%
 flowchart TB
-    WAN(("Réseau externe / Internet"))
-    FW["Pare-feu réseau<br/>VPN et filtrage inter-VLAN"]
+    WAN(("Internet"))
+    FW["Pare-feu réseau<br/>VPN · filtrage inter-VLAN"]
     CORE["Commutateur cœur de réseau"]
 
-    subgraph V50["VLAN 50 — Accès distants"]
-        VPN["Postes distants connectés<br/>via tunnel VPN"]
-    end
-
-    subgraph V10["VLAN 10 — Postes utilisateurs"]
-        USERS["Postes des collaborateurs"]
-    end
-
-    subgraph V20["VLAN 20 — Serveurs"]
-        AD["Active Directory"]
-        FILES["Serveur de fichiers"]
-        APP["Serveur métier"]
-    end
-
-    subgraph V30["VLAN 30 — Administration"]
-        ADM["Postes d'administration dédiés"]
-    end
-
-    subgraph V40["VLAN 40 — Gestion des équipements réseau"]
-        MGMT["Interfaces d'administration<br/>pare-feux · commutateurs · équipements"]
+    subgraph LOCAL["SYSTÈME D'INFORMATION LOCAL"]
+        direction TB
+        subgraph V10["VLAN 10 — UTILISATEURS"]
+            USERS["Postes collaborateurs"]
+        end
+        subgraph V20["VLAN 20 — SERVEURS"]
+            AD["Active Directory"]
+            FILES["Serveur de fichiers"]
+            APP["Serveur métier"]
+        end
+        subgraph V30["VLAN 30 — ADMINISTRATION"]
+            ADM["Postes d'administration dédiés"]
+        end
+        subgraph V40["VLAN 40 — GESTION RÉSEAU"]
+            MGMT["Interfaces d'administration<br/>pare-feu · commutateurs · équipements"]
+        end
+        subgraph V50["VLAN 50 — ACCÈS DISTANTS"]
+            VPN["Postes distants connectés<br/>via tunnel VPN"]
+        end
     end
 
     WAN --> FW
     FW --> CORE
-    CORE --- VPN
-    CORE --- USERS
-    CORE --- AD
-    CORE --- FILES
-    CORE --- APP
-    CORE --- ADM
-    CORE --- MGMT
+    CORE --> USERS
+    CORE --> AD
+    CORE --> FILES
+    CORE --> APP
+    CORE --> ADM
+    CORE --> MGMT
+    FW --> VPN
 
-    NOTE["Le pare-feu filtre les flux entre VLAN.<br/>Les flux au sein d'un même VLAN ne le traversent généralement pas."]
+    NOTE["Le pare-feu contrôle les flux inter-VLAN.<br/>Les échanges au sein d'un même VLAN ne le traversent généralement pas."]
     CORE -.-> NOTE
+
+    classDef endpoint fill:#16324f,stroke:#60a5fa,stroke-width:2px,color:#ffffff
+    classDef server fill:#164e3b,stroke:#4ade80,stroke-width:2px,color:#ffffff
+    classDef network fill:#713f12,stroke:#fbbf24,stroke-width:3px,color:#ffffff
+    classDef external fill:#3b245f,stroke:#c084fc,stroke-width:2px,color:#ffffff
+    classDef note fill:#263449,stroke:#94a3b8,stroke-width:1.5px,color:#f8fafc
+
+    class USERS,ADM endpoint
+    class AD,FILES,APP server
+    class FW,CORE,MGMT network
+    class WAN,VPN external
+    class NOTE note
+    linkStyle default stroke:#facc15,stroke-width:3px,color:#f8fafc
