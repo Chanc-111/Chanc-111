@@ -1,38 +1,47 @@
-# 🛡️ Projet 01 — Architecture Zero Trust
+# 🛡️ Architecture Zero Trust
 
-**Statut :** 🟡 En cours — cadrage et conception
+<sub>Projet personnel de conception et de mise en œuvre progressive · En cours</sub>
 
-## Présentation
+## 🎯 Objectif
+Faire évoluer un système d'information local vers une approche Zero Trust en renforçant la vérification des accès aux ressources et en limitant les communications réseau au strict nécessaire.
 
-Conception et mise en œuvre progressive d'une architecture Zero Trust pour un système d'information local fictif. Le laboratoire explore le contrôle des accès aux ressources, le moindre privilège et la limitation des communications latérales.
+Le scénario repose sur une entreprise fictive dont l'architecture initiale utilise une segmentation en VLAN et un accès distant VPN. Le point de départ est la compromission d'identifiants VPN : être authentifié sur le réseau ne doit pas donner un accès implicite à l'ensemble du SI.
 
-## Contexte
+## 🧱 Périmètre du laboratoire
+| Zone | Contenu |
+|---|---|
+| VLAN 10 — Utilisateurs | Postes de travail |
+| VLAN 20 — Serveurs | Active Directory / DNS, serveur de fichiers, intranet |
+| VLAN 30 — Administration | Postes d'administration |
 
-L'infrastructure initiale repose sur une segmentation en VLAN et des contrôles réseau périmétriques. Un scénario de compromission d'identifiants VPN sert de point de départ : l'authentification au réseau ne doit pas donner, à elle seule, un accès étendu aux ressources internes.
+**Socle technique envisagé :** Windows Server 2022 (AD DS / DNS et fichiers), Debian 13 (intranet), Twingate (ZTNA), Stormshield (filtrage réseau), pare-feu hôtes Windows et Linux, EVE-NG et virtualisation locale.
 
-## Objectifs
+La première phase reste centrée sur le SI local. Le plan de contrôle Twingate est un service opéré par l'éditeur ; cela ne signifie pas que les ressources métier du laboratoire sont hébergées dans un cloud.
 
-- Contrôler les accès aux ressources à l'aide d'une solution ZTNA.
-- Appliquer le moindre privilège aux utilisateurs et administrateurs.
-- Limiter les communications entre serveurs aux flux nécessaires.
-- Vérifier les contrôles par des tests reproductibles.
+## 🔐 Principes de sécurité étudiés
+- **ZTNA :** accès par ressource et par identité, plutôt qu'un accès réseau étendu après connexion VPN.
+- **Moindre privilège :** droits AD, permissions SMB/NTFS et séparation des comptes standards et administrateurs.
+- **Microsegmentation :** filtrage local des communications entre serveurs, en complément du contrôle d'accès ZTNA.
+- **Vérification :** tests d'accès autorisés et refusés, contrôle des flux et observation des journaux.
 
-## Organisation
+> Le ZTNA et la microsegmentation répondent à des besoins différents : Twingate contrôle l'accès des utilisateurs aux ressources publiées ; les pare-feu des hôtes limitent les communications entre systèmes. L'un ne remplace pas l'autre.
 
-- [01 — Contexte](01-context/context-and-objectives.md)
-- [02 — Architecture existante](02-existing-architecture/architecture.md)
-- [03 — Architecture cible](03-target-architecture/architecture.md)
-- [04 — Mise en œuvre](04-implementation/README.md)
-- [05 — Validation](05-validation/test-results.md)
-- [Schémas](diagrams/README.md)
-- [Scripts](scripts/README.md)
+## 🗺️ Schémas d'architecture
+- [Architecture existante](diagrams/01-existing-architecture.mmd)
+- [Architecture cible Zero Trust](diagrams/02-target-architecture.mmd)
+- [Parcours d'accès ZTNA](diagrams/03-ztna-access-flow.mmd)
 
-## Environnement envisagé
+## 🧪 Validation prévue
+1. Accès autorisé à une ressource via Twingate.
+2. Refus d'un accès direct non autorisé.
+3. Refus d'accès à une ressource pour une identité non habilitée.
+4. Respect des droits sur le partage de fichiers.
+5. Blocage des flux inter-serveurs non nécessaires.
+6. Révocation effective d'un compte ou d'une autorisation.
 
-Twingate, Stormshield, VLAN, Windows Server, Active Directory, Debian, Windows Defender Firewall, nftables et virtualisation locale.
+Les contrôles ne seront considérés comme validés qu'après exécution et conservation de preuves.
 
-Les choix définitifs seront précisés pendant la conception. Les éléments envisagés ne sont pas présentés comme déjà déployés ou validés.
+## 📌 Avancement
+Le projet est au stade du cadrage et de la conception. Les technologies, configurations et résultats seront précisés au fil de la construction du laboratoire. Les éléments envisagés ne sont pas présentés comme déjà déployés ou testés.
 
-## Démarche
-
-**Comprendre → Concevoir → Mettre en œuvre → Tester → Documenter.**
+**Démarche :** comprendre → concevoir → mettre en œuvre → tester → documenter.
