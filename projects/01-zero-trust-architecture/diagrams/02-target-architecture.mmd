@@ -1,69 +1,47 @@
-%%{init: {"theme":"base","themeVariables":{"background":"#0b1220","primaryColor":"#172b45","primaryTextColor":"#f8fafc","primaryBorderColor":"#60a5fa","lineColor":"#facc15","secondaryColor":"#182235","tertiaryColor":"#202b3d","clusterBkg":"#111c2e","clusterBorder":"#64748b","edgeLabelBackground":"#263449","fontFamily":"Arial","fontSize":"14px"},"flowchart":{"curve":"linear","htmlLabels":true,"nodeSpacing":35,"rankSpacing":48}}}%%
-flowchart TB
-    subgraph EXTERNAL["ACCÈS EXTERNE"]
-        direction LR
-        REMOTE["Postes distants<br/>Twingate Client"]
-        INTERNET(("Internet"))
-        subgraph TWINGATE["INFRASTRUCTURE TWINGATE — CLOUD"]
-            direction LR
-            CTRL["Controller<br/>Authentification · autorisation"]
-            RELAY["Relay<br/>si connexion directe impossible"]
-        end
+%%{init: {"theme":"base","themeVariables":{"background":"#0b1220","primaryColor":"#172b45","primaryTextColor":"#f8fafc","primaryBorderColor":"#60a5fa","lineColor":"#facc15","secondaryColor":"#182235","tertiaryColor":"#202b3d","clusterBkg":"#111c2e","clusterBorder":"#64748b","edgeLabelBackground":"#263449","fontFamily":"Arial","fontSize":"14px"},"flowchart":{"curve":"linear","htmlLabels":true,"nodeSpacing":32,"rankSpacing":42}}}%%
+flowchart LR
+    subgraph INTERNET["INTERNET"]
+        direction TB
+        REMOTE["Utilisateurs distants<br/>Twingate Client"]
+        TWIN["Twingate Cloud<br/>Plan de contrôle · Relay"]
     end
 
-    subgraph ONSITE["SI LOCAL — ON-PREMISES"]
+    subgraph SI["SI LOCAL — ON-PREMISES"]
         direction TB
-        subgraph ACCESS["POSTES ET ADMINISTRATION"]
-            direction LR
-            USERS["VLAN 10<br/>Postes utilisateurs<br/>Twingate Client"]
-            ADM["VLAN 30<br/>Postes d'administration<br/>Twingate Client"]
-        end
-
-        FW["Stormshield<br/>Filtrage Internet et inter-zones"]
+        FW["Pare-feu Stormshield"]
         CORE["Commutateur cœur de réseau"]
 
-        subgraph CONNECTOR_ZONE["ZONE CONNECTOR — EMPLACEMENT À DÉFINIR"]
-            CONN["Twingate Connector"]
-        end
-
-        subgraph INTERNAL_ZONES["ZONES INTERNES"]
+        subgraph ZONES["SEGMENTATION RÉSEAU"]
             direction LR
-            subgraph VLAN20["VLAN 20 — SERVEURS"]
+            V10["VLAN 10<br/>Postes utilisateurs"]
+            V30["VLAN 30<br/>Administration"]
+            subgraph V20["VLAN 20 — SERVEURS"]
                 direction TB
-                AD["Active Directory / DNS<br/>Pare-feu hôte"]
-                FILES["Serveur de fichiers<br/>Pare-feu hôte"]
-                APP["Serveur métier<br/>Pare-feu hôte"]
-                MICRO["Microsegmentation<br/>Filtrage local des flux entre serveurs"]
+                AD["Active Directory / DNS"]
+                FILES["Serveur de fichiers"]
+                APP["Serveur métier"]
+                MICRO["Pare-feux hôtes<br/>Microsegmentation"]
                 AD ~~~ FILES
                 FILES ~~~ APP
-                AD ~~~ APP
                 MICRO -.-> AD
                 MICRO -.-> FILES
                 MICRO -.-> APP
             end
-
-            subgraph VLAN40["VLAN 40 — GESTION DES ÉQUIPEMENTS"]
-                MGMT["Interfaces d'administration<br/>Pare-feu · commutateurs · équipements"]
-            end
+            V40["VLAN 40<br/>Gestion des équipements"]
         end
+
+        CONN["Twingate Connector<br/>Zone locale dédiée"]
     end
 
-    REMOTE -->|"Accès Internet"| INTERNET
-    USERS -->|"Accès Internet"| FW
-    ADM -->|"Accès Internet"| FW
-    INTERNET <-->|"Échanges de contrôle"| CTRL
-    CTRL -.->|"Informations d'autorisation"| REMOTE
-    CTRL -.->|"Enregistrement et autorisation"| CONN
-    CONN <-->|"Tunnel chiffré Client–Connector<br/>direct ou via Relay"| RELAY
-    REMOTE <-->|"Tunnel chiffré Client–Connector<br/>direct si possible"| CONN
-
-    FW <-->|"Accès Internet sortant du SI"| INTERNET
-    FW <-->|"Routage et filtrage inter-zones"| CORE
-    CORE --- USERS
-    CORE --- ADM
-    CORE --- CONN
-    CORE --- VLAN20
-    CORE --- MGMT
+    REMOTE --- TWIN
+    TWIN --- FW
+    FW --- CORE
+    CORE --- V10
+    CORE --- V30
+    CORE --- V20
+    CORE --- V40
+    FW --- CONN
+    CONN --- FW
 
     classDef endpoint fill:#16324f,stroke:#60a5fa,stroke-width:2px,color:#ffffff
     classDef control fill:#3b245f,stroke:#c084fc,stroke-width:2px,color:#ffffff
@@ -71,9 +49,9 @@ flowchart TB
     classDef server fill:#164e3b,stroke:#4ade80,stroke-width:2px,color:#ffffff
     classDef micro fill:#7f1d1d,stroke:#fb7185,stroke-width:2px,color:#ffffff
 
-    class REMOTE,USERS,ADM endpoint
-    class CTRL,RELAY control
+    class REMOTE,V10,V30,V40 endpoint
+    class TWIN control
     class FW,CORE,CONN network
-    class AD,FILES,APP,MGMT server
+    class AD,FILES,APP server
     class MICRO micro
     linkStyle default stroke:#facc15,stroke-width:2.5px,color:#f8fafc
