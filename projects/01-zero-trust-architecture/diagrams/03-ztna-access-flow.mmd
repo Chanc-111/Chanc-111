@@ -1,0 +1,21 @@
+sequenceDiagram
+    autonumber
+    actor User as Utilisateur
+    participant Client as Twingate Client
+    participant Control as Plan de contrôle
+    participant Connector as Connector local
+    participant Resource as Ressource interne
+
+    User->>Client: Demande d'accès à une ressource
+    Client->>Control: Authentification et demande d'autorisation
+    Control->>Control: Évaluation des règles d'accès
+
+    alt Accès autorisé
+        Control-->>Client: Autorisation
+        Client->>Connector: Établissement du chemin d'accès
+        Connector->>Resource: Connexion au service publié
+        Resource-->>User: Réponse applicative
+    else Accès refusé
+        Control-->>Client: Refus d'accès
+        Client-->>User: Ressource inaccessible
+    end
