@@ -40,8 +40,7 @@ flowchart LR
     CORE --- V30
     CORE --- V20
     CORE --- V40
-    FW --- CONN
-    CONN --- FW
+    FW <-->|"Flux via le Stormshield"| CONN
 
     classDef endpoint fill:#16324f,stroke:#60a5fa,stroke-width:2px,color:#ffffff
     classDef control fill:#3b245f,stroke:#c084fc,stroke-width:2px,color:#ffffff
