@@ -1,0 +1,29 @@
+flowchart TB
+    subgraph ENDPOINTS["Identités et terminaux"]
+        U["Poste utilisateur"]
+        A["Poste administrateur"]
+        ID["Identité et groupes AD"]
+    end
+    subgraph ZTNA["Accès ZTNA — Twingate"]
+        CLIENT["Twingate Client"]
+        CONTROL["Plan de contrôle"]
+        CONNECTOR["Twingate Connector<br/>dans le SI local"]
+    end
+    subgraph LOCAL["Ressources locales — VLAN 20"]
+        AD["AD DS / DNS"]
+        FS["Serveur de fichiers"]
+        WEB["Intranet"]
+    end
+    U --> CLIENT
+    A --> CLIENT
+    CLIENT <-->|"Authentification et autorisation"| CONTROL
+    CLIENT -->|"Accès aux seules ressources autorisées"| CONNECTOR
+    CONNECTOR --> AD
+    CONNECTOR --> FS
+    CONNECTOR --> WEB
+    ID -.->|"Groupes et habilitations"| CONTROL
+    AD <-->|"Flux d'infrastructure nécessaires"| FS
+    AD <-->|"Flux d'infrastructure nécessaires"| WEB
+    FW["Pare-feu hôtes<br/>Windows Firewall / nftables"] -.->|"Filtrage local des flux"| AD
+    FW -.->|"Filtrage local des flux"| FS
+    FW -.->|"Filtrage local des flux"| WEB
