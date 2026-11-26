@@ -1,25 +1,28 @@
+%%{init: {"theme":"dark","themeVariables":{"background":"#0b1220","primaryColor":"#172b45","primaryTextColor":"#f8fafc","primaryBorderColor":"#a78bfa","lineColor":"#facc15","actorBkg":"#172b45","actorBorder":"#a78bfa","actorTextColor":"#f8fafc","actorLineColor":"#a78bfa","signalColor":"#facc15","signalTextColor":"#f8fafc","labelBoxBkgColor":"#263449","labelBoxBorderColor":"#a78bfa","labelTextColor":"#f8fafc","loopTextColor":"#f8fafc","noteBkgColor":"#fef08a","noteBorderColor":"#facc15","noteTextColor":"#111827","activationBkgColor":"#263449","activationBorderColor":"#a78bfa","sequenceNumberColor":"#0b1220","fontFamily":"Arial","fontSize":"14px"},"sequence":{"useMaxWidth":true,"diagramMarginX":24,"diagramMarginY":16,"actorMargin":48,"messageMargin":28,"noteMargin":12}}}%%
 sequenceDiagram
     autonumber
-    actor User as Utilisateur ou administrateur
+    actor User as Utilisateur
     participant Client as Twingate Client
-    participant Control as Plan de contrôle Twingate
+    participant Control as Plan de contrôle
     participant Connector as Connector local
     participant FW as Pare-feu réseau
     participant Resource as Ressource interne
 
-    User->>Client: Demande d'accès à une ressource
-    Client->>Control: Authentification et demande d'autorisation
-    Note over Control: Évaluation des politiques<br/>identité, droits et contexte disponible
+    User->>Client: Demande d'accès
+    Client->>Control: Authentification et autorisation
+    Note over Control: Vérification de l'identité<br/>et des règles d'accès
 
     alt Accès autorisé
-        Control-->>Client: Autorisation
-        Client->>Connector: Établissement du chemin ZTNA
-        Connector->>FW: Trafic vers la ressource publiée
-        FW->>Resource: Flux autorisé vers la ressource
-        Resource-->>User: Réponse applicative
+        Control-->>Client: Accès autorisé
+        Client->>Connector: Connexion ZTNA chiffrée
+        Connector->>FW: Flux vers la ressource
+        FW->>Resource: Flux autorisé
+        Resource-->>Connector: Réponse
+        Connector-->>Client: Réponse via le tunnel
+        Client-->>User: Accès à la ressource
     else Accès refusé
-        Control-->>Client: Refus d'accès
+        Control-->>Client: Accès refusé
         Client-->>User: Ressource inaccessible
     end
 
-    Note over Resource: Les permissions applicatives et les pare-feux hôtes<br/>continuent de contrôler les accès et flux locaux.
+    Note over FW,Resource: Le pare-feu réseau filtre les flux.<br/>Les permissions applicatives et pare-feux hôtes<br/>contrôlent les accès locaux.
