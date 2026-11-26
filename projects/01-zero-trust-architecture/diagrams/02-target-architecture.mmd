@@ -1,58 +1,83 @@
+%%{init: {"theme":"base","themeVariables":{"background":"#0b1220","primaryColor":"#172b45","primaryTextColor":"#f8fafc","primaryBorderColor":"#38bdf8","lineColor":"#facc15","secondaryColor":"#182235","tertiaryColor":"#202b3d","clusterBkg":"#111c2e","clusterBorder":"#64748b","edgeLabelBackground":"#263449","fontFamily":"Arial","fontSize":"15px"},"flowchart":{"curve":"basis","htmlLabels":true,"nodeSpacing":45,"rankSpacing":60}}}%%
 flowchart TB
     INTERNET(("Internet"))
 
-    subgraph ENDPOINTS["Terminaux et identités"]
-        USER["Utilisateur sur site ou à distance"]
+    subgraph ACCESS["TERMINAUX ET IDENTITÉS"]
+        USER["Utilisateur<br/>sur site ou à distance"]
         ADMIN["Administrateur<br/>poste dédié"]
-        ID["Identité locale<br/>Active Directory"]
+        ID["Identité et habilitations<br/>Active Directory"]
+        CLIENT["Twingate Client"]
     end
 
-    CONTROL["Plan de contrôle Twingate<br/>Hébergé par le fournisseur"]
-    POLICY["Politiques d'accès ZTNA<br/>Identité · droits · contexte disponible"]
-    CLIENT["Twingate Client"]
-    CONNECTOR["Twingate Connector(s)<br/>dans le SI local"]
+    subgraph CLOUD["PLAN DE CONTRÔLE EXTERNE"]
+        CONTROL["Plan de contrôle Twingate"]
+        POLICY["Politiques d'accès<br/>identité · ressource · contexte disponible"]
+    end
 
-    subgraph ONSITE["SI on-premises"]
-        FW["Pare-feu réseau<br/>filtrage inter-zones"]
+    subgraph LOCAL["SYSTÈME D'INFORMATION LOCAL"]
+        CONNECTOR["Twingate Connector(s)<br/>point de jonction ZTNA"]
 
-        subgraph V10["VLAN 10 — Postes utilisateurs"]
+        FW["PARE-FEU RÉSEAU — STORMSHIELD<br/>Filtrage inter-VLAN et contrôle des flux"]
+
+        subgraph V10["VLAN 10 — UTILISATEURS"]
             USERS["Postes collaborateurs"]
         end
 
-        subgraph V20["VLAN 20 — Serveurs"]
-            AD["Contrôleurs de domaine AD"]
+        subgraph V20["VLAN 20 — SERVEURS"]
+            AD["Active Directory / DNS"]
             FILES["Serveur de fichiers"]
             APP["Serveur métier"]
-            HOSTFW["Pare-feux hôtes<br/>Windows Defender Firewall / nftables"]
         end
 
-        subgraph V30["VLAN 30 — Administration"]
-            ADM["Postes d'administration dédiés"]
+        subgraph V30["VLAN 30 — ADMINISTRATION"]
+            ADM["Postes d'administration"]
         end
 
-        subgraph V40["VLAN 40 — Gestion des équipements réseau"]
-            NET["Interfaces de gestion<br/>HTTPS / SSH"]
+        subgraph V40["VLAN 40 — GESTION RÉSEAU"]
+            NET["Équipements réseau<br/>interfaces HTTPS / SSH"]
         end
+
+        HOSTFW["PARE-FEUX HÔTES<br/>Windows Defender Firewall / nftables<br/>Filtrage local et microsegmentation"]
     end
 
     USER --> CLIENT
     ADMIN --> CLIENT
+
     CLIENT <-->|"Authentification et décision d'accès"| CONTROL
+    ID -.->|"Source d'identité / groupes<br/>(intégration à préciser)"| POLICY
     CONTROL --> POLICY
-    ID -.->|"Intégration d'identité à préciser"| POLICY
-    POLICY -.->|"Autorisation"| CLIENT
-    CLIENT -->|"Accès aux seules ressources publiées et autorisées"| CONNECTOR
-    CONNECTOR --> FW
-    FW --> AD
-    FW --> FILES
-    FW --> APP
-    FW --> NET
+    POLICY -.->|"Décision d'autorisation"| CLIENT
 
-    HOSTFW -.->|"Filtrage des flux entre workloads"| AD
-    HOSTFW -.->|"Filtrage des flux entre workloads"| FILES
-    HOSTFW -.->|"Filtrage des flux entre workloads"| APP
+    CLIENT ==>|"Tunnel chiffré vers une ressource autorisée"| CONNECTOR
+    CONNECTOR ==>|"Flux autorisé"| FW
 
-    INTERNET --- CONTROL
+    FW ==>|"Règles de filtrage réseau"| AD
+    FW ==>|"Règles de filtrage réseau"| FILES
+    FW ==>|"Règles de filtrage réseau"| APP
+    FW ==>|"Accès d'administration autorisé"| NET
 
-    REMOVED["VLAN 50 — Accès VPN : supprimé dans le modèle cible<br/>Les terminaux distants utilisent le ZTNA via Internet."]
-    INTERNET -.-> REMOVED
+    HOSTFW -.->|"Règles locales sur chaque serveur"| AD
+    HOSTFW -.->|"Règles locales sur chaque serveur"| FILES
+    HOSTFW -.->|"Règles locales sur chaque serveur"| APP
+
+    INTERNET <-->|"HTTPS — plan de contrôle"| CONTROL
+
+    REMOVED["VLAN 50 — VPN<br/>Non reconduit dans le modèle cible"]
+    INTERNET -.->|"Accès distant via ZTNA"| CLIENT
+    REMOVED -.->|"Remplacé par l'accès ZTNA"| INTERNET
+
+    classDef endpoint fill:#16324f,stroke:#38bdf8,stroke-width:2px,color:#ffffff
+    classDef control fill:#3b245f,stroke:#c084fc,stroke-width:2px,color:#ffffff
+    classDef network fill:#713f12,stroke:#fbbf24,stroke-width:4px,color:#ffffff
+    classDef server fill:#164e3b,stroke:#4ade80,stroke-width:2px,color:#ffffff
+    classDef security fill:#7f1d1d,stroke:#fb7185,stroke-width:3px,color:#ffffff
+    classDef retired fill:#374151,stroke:#9ca3af,stroke-width:2px,color:#e5e7eb
+
+    class USER,ADMIN,ID,CLIENT,USERS,ADM,NET endpoint
+    class CONTROL,POLICY control
+    class FW network
+    class AD,FILES,APP server
+    class CONNECTOR,HOSTFW security
+    class REMOVED retired
+
+    linkStyle default stroke:#facc15,stroke-width:3px,color:#f8fafc
