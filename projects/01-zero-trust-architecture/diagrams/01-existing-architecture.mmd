@@ -1,0 +1,22 @@
+flowchart TB
+    VPN["Utilisateur distant"] --> ACCESS["Accès VPN"]
+    subgraph LAN["SI local"]
+        FW["Pare-feu périmétrique<br/>Filtrage inter-VLAN"]
+        subgraph V10["VLAN 10 — Utilisateurs"]
+            USER["Postes utilisateurs"]
+        end
+        subgraph V20["VLAN 20 — Serveurs"]
+            AD["Active Directory / DNS"]
+            FILES["Serveur de fichiers<br/>SMB / NTFS"]
+            WEB["Intranet<br/>Debian"]
+        end
+        subgraph V30["VLAN 30 — Administration"]
+            ADMIN["Postes d'administration"]
+        end
+        FW --- USER
+        FW --- AD
+        FW --- FILES
+        FW --- WEB
+        FW --- ADMIN
+    end
+    ACCESS --> FW
