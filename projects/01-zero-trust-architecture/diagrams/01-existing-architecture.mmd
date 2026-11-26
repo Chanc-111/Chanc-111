@@ -1,22 +1,39 @@
 flowchart TB
-    VPN["Utilisateur distant"] --> ACCESS["Accès VPN"]
-    subgraph LAN["SI local"]
-        FW["Pare-feu périmétrique<br/>Filtrage inter-VLAN"]
-        subgraph V10["VLAN 10 — Utilisateurs"]
-            USER["Postes utilisateurs"]
-        end
-        subgraph V20["VLAN 20 — Serveurs"]
-            AD["Active Directory / DNS"]
-            FILES["Serveur de fichiers<br/>SMB / NTFS"]
-            WEB["Intranet<br/>Debian"]
-        end
-        subgraph V30["VLAN 30 — Administration"]
-            ADMIN["Postes d'administration"]
-        end
-        FW --- USER
-        FW --- AD
-        FW --- FILES
-        FW --- WEB
-        FW --- ADMIN
+    WAN(("Réseau externe / Internet"))
+    FW["Pare-feu réseau<br/>VPN et filtrage inter-VLAN"]
+    CORE["Commutateur cœur de réseau"]
+
+    subgraph V50["VLAN 50 — Accès distants"]
+        VPN["Postes distants connectés<br/>via tunnel VPN"]
     end
-    ACCESS --> FW
+
+    subgraph V10["VLAN 10 — Postes utilisateurs"]
+        USERS["Postes des collaborateurs"]
+    end
+
+    subgraph V20["VLAN 20 — Serveurs"]
+        AD["Active Directory"]
+        FILES["Serveur de fichiers"]
+        APP["Serveur métier"]
+    end
+
+    subgraph V30["VLAN 30 — Administration"]
+        ADM["Postes d'administration dédiés"]
+    end
+
+    subgraph V40["VLAN 40 — Gestion des équipements réseau"]
+        MGMT["Interfaces d'administration<br/>pare-feux · commutateurs · équipements"]
+    end
+
+    WAN --> FW
+    FW --> CORE
+    CORE --- VPN
+    CORE --- USERS
+    CORE --- AD
+    CORE --- FILES
+    CORE --- APP
+    CORE --- ADM
+    CORE --- MGMT
+
+    NOTE["Le pare-feu filtre les flux entre VLAN.<br/>Les flux au sein d'un même VLAN ne le traversent généralement pas."]
+    CORE -.-> NOTE
