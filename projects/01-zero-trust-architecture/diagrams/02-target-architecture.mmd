@@ -1,29 +1,58 @@
 flowchart TB
-    subgraph ENDPOINTS["Identités et terminaux"]
-        U["Poste utilisateur"]
-        A["Poste administrateur"]
-        ID["Identité et groupes AD"]
+    INTERNET(("Internet"))
+
+    subgraph ENDPOINTS["Terminaux et identités"]
+        USER["Utilisateur sur site ou à distance"]
+        ADMIN["Administrateur<br/>poste dédié"]
+        ID["Identité locale<br/>Active Directory"]
     end
-    subgraph ZTNA["Accès ZTNA — Twingate"]
-        CLIENT["Twingate Client"]
-        CONTROL["Plan de contrôle"]
-        CONNECTOR["Twingate Connector<br/>dans le SI local"]
+
+    CONTROL["Plan de contrôle Twingate<br/>Hébergé par le fournisseur"]
+    POLICY["Politiques d'accès ZTNA<br/>Identité · droits · contexte disponible"]
+    CLIENT["Twingate Client"]
+    CONNECTOR["Twingate Connector(s)<br/>dans le SI local"]
+
+    subgraph ONSITE["SI on-premises"]
+        FW["Pare-feu réseau<br/>filtrage inter-zones"]
+
+        subgraph V10["VLAN 10 — Postes utilisateurs"]
+            USERS["Postes collaborateurs"]
+        end
+
+        subgraph V20["VLAN 20 — Serveurs"]
+            AD["Contrôleurs de domaine AD"]
+            FILES["Serveur de fichiers"]
+            APP["Serveur métier"]
+            HOSTFW["Pare-feux hôtes<br/>Windows Defender Firewall / nftables"]
+        end
+
+        subgraph V30["VLAN 30 — Administration"]
+            ADM["Postes d'administration dédiés"]
+        end
+
+        subgraph V40["VLAN 40 — Gestion des équipements réseau"]
+            NET["Interfaces de gestion<br/>HTTPS / SSH"]
+        end
     end
-    subgraph LOCAL["Ressources locales — VLAN 20"]
-        AD["AD DS / DNS"]
-        FS["Serveur de fichiers"]
-        WEB["Intranet"]
-    end
-    U --> CLIENT
-    A --> CLIENT
-    CLIENT <-->|"Authentification et autorisation"| CONTROL
-    CLIENT -->|"Accès aux seules ressources autorisées"| CONNECTOR
-    CONNECTOR --> AD
-    CONNECTOR --> FS
-    CONNECTOR --> WEB
-    ID -.->|"Groupes et habilitations"| CONTROL
-    AD <-->|"Flux d'infrastructure nécessaires"| FS
-    AD <-->|"Flux d'infrastructure nécessaires"| WEB
-    FW["Pare-feu hôtes<br/>Windows Firewall / nftables"] -.->|"Filtrage local des flux"| AD
-    FW -.->|"Filtrage local des flux"| FS
-    FW -.->|"Filtrage local des flux"| WEB
+
+    USER --> CLIENT
+    ADMIN --> CLIENT
+    CLIENT <-->|"Authentification et décision d'accès"| CONTROL
+    CONTROL --> POLICY
+    ID -.->|"Intégration d'identité à préciser"| POLICY
+    POLICY -.->|"Autorisation"| CLIENT
+    CLIENT -->|"Accès aux seules ressources publiées et autorisées"| CONNECTOR
+    CONNECTOR --> FW
+    FW --> AD
+    FW --> FILES
+    FW --> APP
+    FW --> NET
+
+    HOSTFW -.->|"Filtrage des flux entre workloads"| AD
+    HOSTFW -.->|"Filtrage des flux entre workloads"| FILES
+    HOSTFW -.->|"Filtrage des flux entre workloads"| APP
+
+    INTERNET --- CONTROL
+
+    REMOVED["VLAN 50 — Accès VPN : supprimé dans le modèle cible<br/>Les terminaux distants utilisent le ZTNA via Internet."]
+    INTERNET -.-> REMOVED
