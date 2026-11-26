@@ -1,47 +1,109 @@
-# 🛡️ Architecture Zero Trust
+# 🛡️ Projet 01 — Conception et mise en place d’une architecture Zero Trust
 
-<sub>Projet personnel de conception et de mise en œuvre progressive · En cours</sub>
+<sub>Projet personnel · En cours de conception et de mise en œuvre</sub>
 
-## 🎯 Objectif
-Faire évoluer un système d'information local vers une approche Zero Trust en renforçant la vérification des accès aux ressources et en limitant les communications réseau au strict nécessaire.
+## 🎯 Contexte et objectif
 
-Le scénario repose sur une entreprise fictive dont l'architecture initiale utilise une segmentation en VLAN et un accès distant VPN. Le point de départ est la compromission d'identifiants VPN : être authentifié sur le réseau ne doit pas donner un accès implicite à l'ensemble du SI.
+À la suite d’un incident impliquant l’utilisation frauduleuse d’identifiants VPN dérobés, une entreprise de taille intermédiaire souhaite renforcer la sécurité de son système d’information **on-premises**.
 
-## 🧱 Périmètre du laboratoire
-| Zone | Contenu |
-|---|---|
-| VLAN 10 — Utilisateurs | Postes de travail |
-| VLAN 20 — Serveurs | Active Directory / DNS, serveur de fichiers, intranet |
-| VLAN 30 — Administration | Postes d'administration |
+L’objectif est de faire évoluer progressivement l’architecture vers une approche Zero Trust en :
+- vérifiant les accès selon l’identité et le contexte, dans la mesure des capacités de la solution retenue ;
+- appliquant le principe du moindre privilège ;
+- limitant les communications entre systèmes aux seuls flux nécessaires, grâce à la microsegmentation.
 
-**Socle technique envisagé :** Windows Server 2022 (AD DS / DNS et fichiers), Debian 13 (intranet), Twingate (ZTNA), Stormshield (filtrage réseau), pare-feu hôtes Windows et Linux, EVE-NG et virtualisation locale.
+Les ressources métier restent hébergées localement. Seul le plan de contrôle de la solution ZTNA est hébergé par son fournisseur et accessible via Internet.
 
-La première phase reste centrée sur le SI local. Le plan de contrôle Twingate est un service opéré par l'éditeur ; cela ne signifie pas que les ressources métier du laboratoire sont hébergées dans un cloud.
+## 🧱 Architecture existante — état de référence
 
-## 🔐 Principes de sécurité étudiés
-- **ZTNA :** accès par ressource et par identité, plutôt qu'un accès réseau étendu après connexion VPN.
-- **Moindre privilège :** droits AD, permissions SMB/NTFS et séparation des comptes standards et administrateurs.
-- **Microsegmentation :** filtrage local des communications entre serveurs, en complément du contrôle d'accès ZTNA.
-- **Vérification :** tests d'accès autorisés et refusés, contrôle des flux et observation des journaux.
+L’architecture initiale repose sur cinq zones réseau :
 
-> Le ZTNA et la microsegmentation répondent à des besoins différents : Twingate contrôle l'accès des utilisateurs aux ressources publiées ; les pare-feu des hôtes limitent les communications entre systèmes. L'un ne remplace pas l'autre.
+| VLAN | Affectation | Description |
+|---|---|---|
+| 10 | Postes utilisateurs | Postes de travail des collaborateurs sur le réseau local |
+| 20 | Serveurs | Serveurs hébergeant les services et applications internes |
+| 30 | Administration | Postes dédiés à l’administration des systèmes et équipements |
+| 40 | Gestion des équipements réseau | Interfaces d’administration des pare-feux, commutateurs et autres équipements |
+| 50 | Accès distants | Zone logique d’arrivée des connexions VPN ; les postes distants n’intègrent pas le VLAN 10 |
 
-## 🗺️ Schémas d'architecture
-- [Architecture existante](diagrams/01-existing-architecture.mmd)
-- [Architecture cible Zero Trust](diagrams/02-target-architecture.mmd)
-- [Parcours d'accès ZTNA](diagrams/03-ztna-access-flow.mmd)
+Le routage et le filtrage entre les VLAN sont assurés par un pare-feu. Les communications entre systèmes d’un même VLAN ne traversent généralement pas ce pare-feu.
 
-## 🧪 Validation prévue
-1. Accès autorisé à une ressource via Twingate.
-2. Refus d'un accès direct non autorisé.
-3. Refus d'accès à une ressource pour une identité non habilitée.
-4. Respect des droits sur le partage de fichiers.
-5. Blocage des flux inter-serveurs non nécessaires.
-6. Révocation effective d'un compte ou d'une autorisation.
+**Ressources de référence :** Active Directory, serveur de fichiers, serveur métier, accès VPN et postes d’administration dédiés.
 
-Les contrôles ne seront considérés comme validés qu'après exécution et conservation de preuves.
+[Voir le schéma de l’architecture existante](diagrams/01-existing-architecture.mmd)
+
+## 🔐 Limites identifiées
+
+- Le VPN ouvre un périmètre réseau relativement étendu après authentification.
+- L’appartenance à un VLAN ne garantit pas l’autorisation d’accéder à chaque ressource.
+- Les communications entre serveurs d’un même VLAN échappent généralement au filtrage inter-VLAN.
+- Les accès privilégiés doivent être contrôlés indépendamment de la localisation réseau.
+
+## 🏗️ Architecture cible — principes
+
+La cible repose sur trois dimensions complémentaires :
+
+1. **ZTNA — accès par identité et contexte :** tous les accès utilisateurs aux ressources internes, sur site comme à distance, y compris les accès d’administration, passent par le contrôle ZTNA. La localisation réseau ne suffit pas à autoriser un accès.
+2. **Moindre privilège :** chaque utilisateur et chaque système dispose uniquement des accès et opérations nécessaires.
+3. **Segmentation et microsegmentation :** le pare-feu réseau conserve le filtrage inter-zones ; les pare-feux hôtes contrôlent plus finement les communications entre serveurs, y compris au sein du VLAN serveurs.
+
+Le VPN traditionnel est remplacé, pour les accès utilisateurs, par le modèle ZTNA. Le VLAN 50, dédié à l’arrivée des connexions VPN, n’a donc plus vocation à exister dans la cible sous cette forme.
+
+Le ZTNA ne remplace ni les permissions applicatives, ni les ACL réseau, ni les pare-feux hôtes.
+
+[Voir le schéma de l’architecture cible](diagrams/02-target-architecture.mmd)
+
+## 🧩 Périmètre initial de microsegmentation
+
+La première itération concerne :
+- les contrôleurs de domaine Active Directory ;
+- le serveur de fichiers ;
+- le serveur métier.
+
+Les postes utilisateurs et d’administration restent hors de ce périmètre initial. La microsegmentation repose sur les pare-feux hôtes. Le pare-feu réseau conserve le filtrage inter-VLAN ; les ACL réseau sont hors périmètre de cette première itération.
+
+La matrice des flux sera définie après identification des dépendances réellement nécessaires.
+
+## 🧰 Technologies et environnement envisagés
+
+| Fonction | Technologie | Rôle |
+|---|---|---|
+| Accès Zero Trust | Twingate Starter | Contrôle des accès aux ressources internes |
+| Pare-feu réseau principal | Stormshield SNS EVA | Filtrage inter-VLAN |
+| Pare-feu complémentaire | FortiGate-VM | Expérimentations ciblées et comparaison |
+| Émulation réseau | EVE-NG | Construction de la topologie |
+| Virtualisation | VMware Workstation | Hébergement des machines virtuelles |
+| Annuaire et DNS | Windows Server 2022 | AD DS et DNS |
+| Serveur de fichiers cible | Windows Server 2022 | SMB, permissions NTFS et groupes AD |
+| Serveur applicatif | Debian 13 | Application web interne, par exemple Nginx |
+| Connecteur ZTNA | Debian 13 ou Ubuntu Server | Twingate Connector |
+| Microsegmentation | Windows Defender Firewall et nftables | Filtrage des communications entre serveurs |
+
+Stormshield est le pare-feu réseau de référence. FortiGate sera utilisé dans des expérimentations ciblées, sans être systématiquement placé dans le chemin réseau principal. Les prérequis et limites des offres gratuites seront vérifiés avant déploiement.
+
+## 🔄 Parcours d’accès ZTNA
+
+Le terminal initie une demande d’accès via le client Twingate. Le plan de contrôle évalue les règles d’accès ; si la demande est autorisée, le trafic rejoint le connecteur situé dans le SI local, puis la ressource publiée.
+
+[Voir le diagramme du parcours ZTNA](diagrams/03-ztna-access-flow.mmd)
+
+## 🧪 Cahier de recette
+
+| ID | Test | Résultat attendu |
+|---|---|---|
+| ZTNA-01 | Accès autorisé depuis le LAN puis depuis un réseau externe | Même ressource accessible selon la politique ZTNA, sans VPN traditionnel |
+| ZTNA-02 | Accès à une ressource non attribuée | Accès refusé |
+| ZTNA-03 | Connexion directe à une ressource sans passer par le ZTNA | Connexion bloquée |
+| ZTNA-04 | Accès administrateur HTTPS ou SSH selon le profil | Seul le profil autorisé accède à l’équipement |
+| IAM-01 | Accès à un partage sans permission | Accès refusé |
+| IAM-02 | Désactivation d’un compte ou retrait d’une autorisation | Accès révoqué dans le délai défini |
+| MICRO-01 | Flux serveur-à-serveur explicitement autorisé | Communication fonctionnelle |
+| MICRO-02 | Flux interdit entre deux serveurs du même VLAN | Communication bloquée |
+| MICRO-03 | Simulation d’un déplacement latéral depuis un serveur | Seuls les flux autorisés restent accessibles |
+
+Chaque test devra conserver une preuve reproductible : configuration appliquée, commande exécutée, résultat observé et journal correspondant lorsque disponible. Aucun test ne sera déclaré réussi avant son exécution.
 
 ## 📌 Avancement
+
 Le projet est au stade du cadrage et de la conception. Les technologies, configurations et résultats seront précisés au fil de la construction du laboratoire. Les éléments envisagés ne sont pas présentés comme déjà déployés ou testés.
 
 **Démarche :** comprendre → concevoir → mettre en œuvre → tester → documenter.
