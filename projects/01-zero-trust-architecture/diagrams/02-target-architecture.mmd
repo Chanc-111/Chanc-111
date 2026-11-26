@@ -2,39 +2,35 @@
 flowchart LR
     USER["Poste distant<br/>Twingate Client"]
 
-    subgraph CLOUD["TWINGATE — PLAN DE CONTRÔLE"]
-        CONTROL["Authentification<br/>et décision d'accès"]
+    subgraph INTERNET["INTERNET — INFRASTRUCTURE TWINGATE"]
+        CONTROL["Controller<br/>Authentification et autorisation"]
+        RELAY["Relay Twingate<br/>Facilite l'établissement du tunnel"]
     end
 
-    subgraph SI["SI LOCAL"]
-        CONNECTOR["Twingate Connector"]
-        FW["Pare-feu réseau<br/>Stormshield"]
+    FW["Pare-feu réseau<br/>Stormshield"]
 
+    subgraph LOCAL["RÉSEAU LOCAL — DERRIÈRE LE STORMSHIELD"]
+        CONNECTOR["Twingate Connector<br/>Zone dédiée"]
         subgraph VLAN20["VLAN 20 — SERVEURS"]
             direction TB
-            subgraph SEG_AD["Segment AD / DNS"]
-                AD["Active Directory / DNS<br/>Pare-feu hôte"]
-            end
-            subgraph SEG_FILES["Segment fichiers"]
-                FILES["Serveur de fichiers<br/>Pare-feu hôte"]
-            end
-            subgraph SEG_APP["Segment applicatif"]
-                APP["Serveur métier<br/>Pare-feu hôte"]
-            end
-            AD <-.->|"Flux inter-serveurs autorisés uniquement"| FILES
-            FILES <-.->|"Flux inter-serveurs autorisés uniquement"| APP
-            AD <-.->|"Flux inter-serveurs autorisés uniquement"| APP
+            AD["Active Directory / DNS<br/>Pare-feu hôte"]
+            FILES["Serveur de fichiers<br/>Pare-feu hôte"]
+            APP["Serveur métier<br/>Pare-feu hôte"]
+            AD <-.->|"Flux autorisés uniquement"| FILES
+            FILES <-.->|"Flux autorisés uniquement"| APP
+            AD <-.->|"Flux autorisés uniquement"| APP
         end
-
-        CONNECTOR ==> FW
-        FW ==> AD
-        FW ==> FILES
-        FW ==> APP
     end
 
-    USER -.->|"Authentification / autorisation"| CONTROL
-    CONTROL -.->|"Pilotage du Connector"| CONNECTOR
-    USER ==>|"Tunnel d'accès Twingate"| CONNECTOR
+    USER <-->|"Authentification / autorisation"| CONTROL
+    USER <-->|"Tunnel TLS chiffré<br/>P2P ou via Relay"| RELAY
+    RELAY <-->|"Établissement du tunnel"| CONNECTOR
+
+    CONNECTOR -->|"Connexions sortantes vers Twingate<br/>via le Stormshield"| FW
+    FW --> RELAY
+
+    CONNECTOR -->|"Accès aux ressources"| FW
+    FW --> VLAN20
 
     classDef endpoint fill:#16324f,stroke:#60a5fa,stroke-width:2px,color:#ffffff
     classDef control fill:#3b245f,stroke:#c084fc,stroke-width:2px,color:#ffffff
@@ -42,7 +38,7 @@ flowchart LR
     classDef server fill:#164e3b,stroke:#4ade80,stroke-width:2px,color:#ffffff
 
     class USER endpoint
-    class CONTROL control
-    class CONNECTOR,FW network
+    class CONTROL,RELAY control
+    class FW,CONNECTOR network
     class AD,FILES,APP server
     linkStyle default stroke:#facc15,stroke-width:3px,color:#f8fafc
