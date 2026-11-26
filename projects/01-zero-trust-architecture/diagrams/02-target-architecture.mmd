@@ -1,40 +1,48 @@
 %%{init: {"theme":"base","themeVariables":{"background":"#0b1220","primaryColor":"#172b45","primaryTextColor":"#f8fafc","primaryBorderColor":"#60a5fa","lineColor":"#facc15","secondaryColor":"#182235","tertiaryColor":"#202b3d","clusterBkg":"#111c2e","clusterBorder":"#64748b","edgeLabelBackground":"#263449","fontFamily":"Arial","fontSize":"15px"},"flowchart":{"curve":"basis","htmlLabels":true,"nodeSpacing":42,"rankSpacing":55}}}%%
 flowchart LR
-    USER["Utilisateurs et administrateurs<br/>Twingate Client"]
+    USER["Poste distant<br/>Twingate Client"]
 
-    subgraph TWIN["ACCÈS ZTNA — TWINGATE"]
-        CONTROL["Plan de contrôle<br/>Authentification · autorisations"]
-        CONNECTOR["Twingate Connector"]
+    subgraph CLOUD["TWINGATE — PLAN DE CONTRÔLE"]
+        CONTROL["Authentification<br/>et décision d'accès"]
     end
 
     subgraph SI["SI LOCAL"]
+        CONNECTOR["Twingate Connector"]
         FW["Pare-feu réseau<br/>Stormshield"]
+
         subgraph VLAN20["VLAN 20 — SERVEURS"]
             direction TB
-            AD["Active Directory / DNS"]
-            FILES["Serveur de fichiers"]
-            APP["Serveur métier"]
-            AD <-->|"Flux strictement nécessaires"| FILES
-            FILES <-->|"Flux strictement nécessaires"| APP
-            AD <-->|"Flux strictement nécessaires"| APP
+            subgraph SEG_AD["Segment AD / DNS"]
+                AD["Active Directory / DNS<br/>Pare-feu hôte"]
+            end
+            subgraph SEG_FILES["Segment fichiers"]
+                FILES["Serveur de fichiers<br/>Pare-feu hôte"]
+            end
+            subgraph SEG_APP["Segment applicatif"]
+                APP["Serveur métier<br/>Pare-feu hôte"]
+            end
+            AD <-.->|"Flux inter-serveurs autorisés uniquement"| FILES
+            FILES <-.->|"Flux inter-serveurs autorisés uniquement"| APP
+            AD <-.->|"Flux inter-serveurs autorisés uniquement"| APP
         end
+
+        CONNECTOR ==> FW
+        FW ==> AD
+        FW ==> FILES
+        FW ==> APP
     end
 
-    USER <-->|"Authentification et décision d'accès"| CONTROL
-    USER ==>|"Accès aux ressources autorisées"| CONNECTOR
-    CONNECTOR ==> FW
-    FW ==> AD
-    FW ==> FILES
-    FW ==> APP
+    USER -.->|"Authentification / autorisation"| CONTROL
+    CONTROL -.->|"Pilotage du Connector"| CONNECTOR
+    USER ==>|"Tunnel d'accès Twingate"| CONNECTOR
 
     classDef endpoint fill:#16324f,stroke:#60a5fa,stroke-width:2px,color:#ffffff
     classDef control fill:#3b245f,stroke:#c084fc,stroke-width:2px,color:#ffffff
     classDef network fill:#713f12,stroke:#fbbf24,stroke-width:3px,color:#ffffff
     classDef server fill:#164e3b,stroke:#4ade80,stroke-width:2px,color:#ffffff
-    classDef micro fill:#7f1d1d,stroke:#fb7185,stroke-width:2px,color:#ffffff
 
     class USER endpoint
-    class CONTROL,CONNECTOR control
-    class FW network
+    class CONTROL control
+    class CONNECTOR,FW network
     class AD,FILES,APP server
     linkStyle default stroke:#facc15,stroke-width:3px,color:#f8fafc
