@@ -18,11 +18,11 @@ Ce GitHub est mon espace de partage : j'y documente des projets techniques, des 
 
 ## 🚀 Projets
 
-Les projets sont regroupés dans ce repository. Chaque dossier présente le contexte, l'architecture, les choix techniques, les étapes de réalisation et les résultats des tests.
+Les projets sont regroupés dans ce repository. Chaque dossier contient la présentation du projet, sa documentation et ses schémas.
 
 | # | Projet | Description | Statut |
 |---|---|---|---|
-| 01 | 🛡️ [**Architecture Zero Trust**](./projects/01-zero-trust-architecture/) | Conception et mise en œuvre progressive d'une architecture ZTNA, du moindre privilège et de la microsegmentation dans un SI local. | 🟡 En cours |
+| 01 | 🛡️ [**Architecture Zero Trust**](./projects/01-zero-trust-architecture/README.md) | Conception et mise en œuvre progressive d'une architecture ZTNA, du moindre privilège et de la microsegmentation dans un SI local. | 🟡 En cours |
 
 ## 🧰 Environnement technique
 
