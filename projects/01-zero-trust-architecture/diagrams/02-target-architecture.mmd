@@ -1,64 +1,40 @@
-%%{init: {"theme":"base","themeVariables":{"background":"#0b1220","primaryColor":"#172b45","primaryTextColor":"#f8fafc","primaryBorderColor":"#60a5fa","lineColor":"#facc15","secondaryColor":"#182235","tertiaryColor":"#202b3d","clusterBkg":"#111c2e","clusterBorder":"#64748b","edgeLabelBackground":"#263449","fontFamily":"Arial","fontSize":"15px"},"flowchart":{"curve":"basis","htmlLabels":true,"nodeSpacing":38,"rankSpacing":48}}}%%
-flowchart TB
-    INTERNET(("Internet"))
-    CONTROL["Twingate<br/>Plan de contrôle"]
+%%{init: {"theme":"base","themeVariables":{"background":"#0b1220","primaryColor":"#172b45","primaryTextColor":"#f8fafc","primaryBorderColor":"#60a5fa","lineColor":"#facc15","secondaryColor":"#182235","tertiaryColor":"#202b3d","clusterBkg":"#111c2e","clusterBorder":"#64748b","edgeLabelBackground":"#263449","fontFamily":"Arial","fontSize":"15px"},"flowchart":{"curve":"basis","htmlLabels":true,"nodeSpacing":42,"rankSpacing":55}}}%%
+flowchart LR
+    USER["Utilisateurs et administrateurs<br/>Twingate Client"]
 
-    subgraph USERS["UTILISATEURS ET ADMINISTRATEURS"]
-        CLIENT["Postes équipés du<br/>Twingate Client"]
-    end
-
-    subgraph SI["SYSTÈME D'INFORMATION LOCAL"]
+    subgraph TWIN["ACCÈS ZTNA — TWINGATE"]
+        CONTROL["Plan de contrôle<br/>Authentification · autorisations"]
         CONNECTOR["Twingate Connector"]
-
-        subgraph NETWORK["RÉSEAU INTERNE"]
-            FW["Pare-feu Stormshield<br/>Filtrage inter-VLAN"]
-            CORE["Commutateur cœur de réseau"]
-
-            subgraph V10["VLAN 10 — UTILISATEURS"]
-                U["Postes collaborateurs"]
-            end
-            subgraph V20["VLAN 20 — SERVEURS"]
-                AD["Active Directory / DNS"]
-                FILES["Serveur de fichiers"]
-                APP["Serveur métier"]
-            end
-            subgraph V30["VLAN 30 — ADMINISTRATION"]
-                ADM["Postes d'administration"]
-            end
-            subgraph V40["VLAN 40 — GESTION RÉSEAU"]
-                MGMT["Équipements réseau"]
-            end
-        end
-
-        HOSTFW["Pare-feux hôtes activés<br/>sur les serveurs"]
     end
 
-    INTERNET <-->|"Canal de contrôle"| CONTROL
-    CLIENT <-->|"Authentification"| CONTROL
-    CLIENT ==>|"Accès ZTNA autorisé"| CONNECTOR
-    CONNECTOR -->|"Accès aux ressources publiées"| AD
-    CONNECTOR --> FILES
-    CONNECTOR --> APP
+    subgraph SI["SI LOCAL"]
+        FW["Pare-feu réseau<br/>Stormshield"]
+        subgraph VLAN20["VLAN 20 — SERVEURS"]
+            direction TB
+            AD["Active Directory / DNS"]
+            FILES["Serveur de fichiers"]
+            APP["Serveur métier"]
+            AD <-->|"Flux strictement nécessaires"| FILES
+            FILES <-->|"Flux strictement nécessaires"| APP
+            AD <-->|"Flux strictement nécessaires"| APP
+        end
+    end
 
-    FW --> CORE
-    CORE --- U
-    CORE --- AD
-    CORE --- FILES
-    CORE --- APP
-    CORE --- ADM
-    CORE --- MGMT
-
-    HOSTFW -.->|"Filtrage local"| V20
+    USER <-->|"Authentification et décision d'accès"| CONTROL
+    USER ==>|"Accès aux ressources autorisées"| CONNECTOR
+    CONNECTOR ==> FW
+    FW ==> AD
+    FW ==> FILES
+    FW ==> APP
 
     classDef endpoint fill:#16324f,stroke:#60a5fa,stroke-width:2px,color:#ffffff
-    classDef server fill:#164e3b,stroke:#4ade80,stroke-width:2px,color:#ffffff
+    classDef control fill:#3b245f,stroke:#c084fc,stroke-width:2px,color:#ffffff
     classDef network fill:#713f12,stroke:#fbbf24,stroke-width:3px,color:#ffffff
-    classDef external fill:#3b245f,stroke:#c084fc,stroke-width:2px,color:#ffffff
-    classDef security fill:#7f1d1d,stroke:#fb7185,stroke-width:2.5px,color:#ffffff
+    classDef server fill:#164e3b,stroke:#4ade80,stroke-width:2px,color:#ffffff
+    classDef micro fill:#7f1d1d,stroke:#fb7185,stroke-width:2px,color:#ffffff
 
-    class CLIENT,U,ADM endpoint
-    class CONNECTOR,AD,FILES,APP server
-    class FW,CORE,MGMT network
-    class INTERNET,CONTROL external
-    class HOSTFW security
+    class USER endpoint
+    class CONTROL,CONNECTOR control
+    class FW network
+    class AD,FILES,APP server
     linkStyle default stroke:#facc15,stroke-width:3px,color:#f8fafc
