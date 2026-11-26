@@ -1,21 +1,25 @@
 sequenceDiagram
     autonumber
-    actor User as Utilisateur
+    actor User as Utilisateur ou administrateur
     participant Client as Twingate Client
-    participant Control as Plan de contrôle
+    participant Control as Plan de contrôle Twingate
     participant Connector as Connector local
+    participant FW as Pare-feu réseau
     participant Resource as Ressource interne
 
     User->>Client: Demande d'accès à une ressource
     Client->>Control: Authentification et demande d'autorisation
-    Control->>Control: Évaluation des règles d'accès
+    Note over Control: Évaluation des politiques<br/>identité, droits et contexte disponible
 
     alt Accès autorisé
         Control-->>Client: Autorisation
-        Client->>Connector: Établissement du chemin d'accès
-        Connector->>Resource: Connexion au service publié
+        Client->>Connector: Établissement du chemin ZTNA
+        Connector->>FW: Trafic vers la ressource publiée
+        FW->>Resource: Flux autorisé vers la ressource
         Resource-->>User: Réponse applicative
     else Accès refusé
         Control-->>Client: Refus d'accès
         Client-->>User: Ressource inaccessible
     end
+
+    Note over Resource: Les permissions applicatives et les pare-feux hôtes<br/>continuent de contrôler les accès et flux locaux.
