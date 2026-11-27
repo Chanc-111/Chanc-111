@@ -18,11 +18,11 @@ L’architecture initiale repose sur cinq zones réseau :
 
 | VLAN | Affectation | Description |
 |---|---|---|
-| 10 | Postes utilisateurs | Postes de travail des collaborateurs sur le réseau local | 192.168.10.0/24
-| 20 | Serveurs | Serveurs hébergeant les services et applications internes | 192.168.20.0/24
-| 30 | Administration | Postes dédiés à l’administration des systèmes et équipements | 192.168.30.0/24
-| 40 | Gestion des équipements réseau | Interfaces d’administration des pare-feux, commutateurs et autres équipements | 192.168.40.0/24
-| 50 | Accès distants | Zone logique d’arrivée des connexions VPN ; les postes distants n’intègrent pas le VLAN 10 | 192.168.50.0/24
+| 10 | Postes utilisateurs | Postes de travail des collaborateurs sur le réseau local | 192.168.10.0/24 |
+| 20 | Serveurs | Serveurs hébergeant les services et applications internes | 192.168.20.0/24 |
+| 30 | Administration | Postes dédiés à l’administration des systèmes et équipements | 192.168.30.0/24 |
+| 40 | Gestion des équipements réseau | Interfaces d’administration des pare-feux, commutateurs et autres équipements | 192.168.40.0/24 |
+| 50 | Accès distants | Zone logique d’arrivée des connexions VPN ; les postes distants n’intègrent pas le VLAN 10 | 192.168.50.0/24 |
 
 Le routage et le filtrage entre les VLAN sont assurés par un pare-feu. Les communications entre systèmes d’un même VLAN ne traversent généralement pas ce pare-feu.
 
