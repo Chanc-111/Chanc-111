@@ -18,7 +18,7 @@ Ce GitHub est mon espace de partage : j'y documente des projets techniques, des 
 
 ## 🚀 Projets
 
-Les projets regroupés dans ce repository s'appuient sur des mises en situation fictives afin de contextualiser les solutions déployées.
+Les projets menés s'appuient sur des contextes fictifs afin de se rapprocher au mieux des infrastructures au sein des entreprises.
 Chaque dossier contient la présentation du projet, sa documentation et ses schémas.
 
 | # | Projet | Description | Statut |
