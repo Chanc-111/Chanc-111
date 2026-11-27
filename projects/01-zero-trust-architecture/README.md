@@ -86,21 +86,20 @@ Le terminal initie une demande d’accès via le client Twingate. Le plan de con
 
 [Voir le diagramme du parcours ZTNA](diagrams/03-ztna-access-flow.mmd)
 
-## 🧪 Cahier de recette
+## 🧪 Cahier de recette — ZTNA
+
+La première campagne se limite à deux contrôles : l'identité et les autorisations de l'utilisateur, puis la posture de sécurité du terminal.
 
 | ID | Test | Résultat attendu |
 |---|---|---|
-| ZTNA-01 | Accès autorisé depuis le LAN puis depuis un réseau externe | Même ressource accessible selon la politique ZTNA, sans VPN traditionnel |
-| ZTNA-02 | Accès à une ressource non attribuée | Accès refusé |
-| ZTNA-03 | Connexion directe à une ressource sans passer par le ZTNA | Connexion bloquée |
-| ZTNA-04 | Accès administrateur HTTPS ou SSH selon le profil | Seul le profil autorisé accède à l’équipement |
-| IAM-01 | Accès à un partage sans permission | Accès refusé |
-| IAM-02 | Désactivation d’un compte ou retrait d’une autorisation | Accès révoqué dans le délai défini |
-| MICRO-01 | Flux serveur-à-serveur explicitement autorisé | Communication fonctionnelle |
-| MICRO-02 | Flux interdit entre deux serveurs du même VLAN | Communication bloquée |
-| MICRO-03 | Simulation d’un déplacement latéral depuis un serveur | Seuls les flux autorisés restent accessibles |
+| ZTNA-01 | Un utilisateur authentifié et autorisé tente d'accéder à une ressource qui lui est attribuée | Accès accordé |
+| ZTNA-02 | Un utilisateur authentifié, mais non autorisé à accéder à cette ressource, tente une connexion | Accès refusé |
+| ZTNA-03 | Un utilisateur autorisé se connecte depuis un terminal conforme aux critères de sécurité définis | Accès accordé |
+| ZTNA-04 | Le même utilisateur tente d'accéder à la ressource depuis un terminal qui ne respecte pas au moins un critère de sécurité | Accès refusé |
 
-Chaque test devra conserver une preuve reproductible : configuration appliquée, commande exécutée, résultat observé et journal correspondant lorsque disponible. Aucun test ne sera déclaré réussi avant son exécution.
+**Point de vigilance :** les critères de posture effectivement disponibles (par exemple, chiffrement du disque, pare-feu ou antivirus) ainsi que leur prise en charge dans l'offre Twingate Starter devront être vérifiés avant l'exécution de ZTNA-03 et ZTNA-04. Si cette fonctionnalité n'est pas incluse dans l'offre retenue, ces deux tests seront adaptés ou reportés ; ils ne seront pas considérés comme réalisés.
+
+Chaque test devra conserver une preuve reproductible : configuration appliquée, identité et état du terminal utilisés, résultat observé et journal correspondant lorsque disponible. Aucun test ne sera déclaré réussi avant son exécution.
 
 ## 📌 Avancement
 
