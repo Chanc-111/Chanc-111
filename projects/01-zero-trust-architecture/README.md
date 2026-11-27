@@ -16,8 +16,8 @@ Les ressources métier restent hébergées localement. Seul le plan de contrôle
 
 L’architecture initiale repose sur cinq zones réseau :
 
-| VLAN | Affectation | Description |
-|---|---|---|
+| VLAN | Affectation | Description | Plan d'adressage |
+|---|---|---|---|
 | 10 | Postes utilisateurs | Postes de travail des collaborateurs sur le réseau local | 192.168.10.0/24 |
 | 20 | Serveurs | Serveurs hébergeant les services et applications internes | 192.168.20.0/24 |
 | 30 | Administration | Postes dédiés à l’administration des systèmes et équipements | 192.168.30.0/24 |
