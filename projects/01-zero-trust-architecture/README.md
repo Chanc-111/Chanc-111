@@ -1,6 +1,6 @@
 # 🛡️ Projet 01 — Conception et mise en place d’une architecture Zero Trust
 
-<sub>Projet personnel · En cours de conception et de mise en œuvre</sub>
+<sub>Projet personnel · Architecture existante mise en place · Architecture cible en cours de mise en œuvre</sub>
 
 ## 🎯 Contexte et objectif
 
@@ -52,17 +52,6 @@ Le ZTNA ne remplace ni les permissions applicatives, ni les ACL réseau, ni les 
 
 [Voir le schéma de l’architecture cible](diagrams/02-target-architecture.mmd)
 
-## 🧩 Périmètre initial de microsegmentation
-
-La première itération concerne :
-- les contrôleurs de domaine Active Directory ;
-- le serveur de fichiers ;
-- le serveur métier.
-
-Les postes utilisateurs et d’administration restent hors de ce périmètre initial. La microsegmentation repose sur les pare-feux hôtes. Le pare-feu réseau conserve le filtrage inter-VLAN ; les ACL réseau sont hors périmètre de cette première itération.
-
-La matrice des flux sera définie après identification des dépendances réellement nécessaires.
-
 ## 🧰 Technologies et environnement envisagés
 
 | Fonction | Technologie | Rôle |
@@ -103,6 +92,6 @@ La première campagne porte sur trois contrôles complémentaires : l'identité 
 
 ## 📌 Avancement
 
-Le projet est au stade du cadrage et de la conception. Les technologies, configurations et résultats seront précisés au fil de la construction du laboratoire. Les éléments envisagés ne sont pas présentés comme déjà déployés ou testés.
+L’architecture existante a été mise en place et sert de base de référence au projet. L’architecture cible est actuellement en cours de mise en œuvre. Les configurations et résultats seront documentés au fur et à mesure de l’avancement ; les éléments qui n’ont pas encore été déployés ou testés seront explicitement identifiés comme tels.
 
 **Démarche :** comprendre → concevoir → mettre en œuvre → tester → documenter.
