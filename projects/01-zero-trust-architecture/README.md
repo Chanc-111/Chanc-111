@@ -1,6 +1,5 @@
 # 🛡️ Projet 01 — Conception et mise en place d’une architecture Zero Trust
 
-<sub>Projet personnel · Architecture existante mise en place · Architecture cible en cours de mise en œuvre</sub>
 
 ## 🎯 Contexte et objectif
 
@@ -19,15 +18,15 @@ L’architecture initiale repose sur cinq zones réseau :
 
 | VLAN | Affectation | Description |
 |---|---|---|
-| 10 | Postes utilisateurs | Postes de travail des collaborateurs sur le réseau local |
-| 20 | Serveurs | Serveurs hébergeant les services et applications internes |
-| 30 | Administration | Postes dédiés à l’administration des systèmes et équipements |
-| 40 | Gestion des équipements réseau | Interfaces d’administration des pare-feux, commutateurs et autres équipements |
-| 50 | Accès distants | Zone logique d’arrivée des connexions VPN ; les postes distants n’intègrent pas le VLAN 10 |
+| 10 | Postes utilisateurs | Postes de travail des collaborateurs sur le réseau local | 192.168.10.0/24
+| 20 | Serveurs | Serveurs hébergeant les services et applications internes | 192.168.20.0/24
+| 30 | Administration | Postes dédiés à l’administration des systèmes et équipements | 192.168.30.0/24
+| 40 | Gestion des équipements réseau | Interfaces d’administration des pare-feux, commutateurs et autres équipements | 192.168.40.0/24
+| 50 | Accès distants | Zone logique d’arrivée des connexions VPN ; les postes distants n’intègrent pas le VLAN 10 | 192.168.50.0/24
 
 Le routage et le filtrage entre les VLAN sont assurés par un pare-feu. Les communications entre systèmes d’un même VLAN ne traversent généralement pas ce pare-feu.
 
-**Ressources de référence :** Active Directory, serveur de fichiers, serveur métier, accès VPN et postes d’administration dédiés.
+**Ressources :** Active Directory, serveur de fichiers, serveur métier, accès VPN et postes d’administration dédiés.
 
 [Voir le schéma de l’architecture existante](diagrams/01-existing-architecture.mmd)
 
@@ -63,11 +62,11 @@ Le ZTNA ne remplace ni les permissions applicatives, ni les ACL réseau, ni les 
 | Virtualisation | VMware Workstation | Hébergement des machines virtuelles |
 | Annuaire et DNS | Windows Server 2022 | AD DS et DNS |
 | Serveur de fichiers cible | Windows Server 2022 | SMB, permissions NTFS et groupes AD |
-| Serveur applicatif | Debian 13 | Application web interne, par exemple Nginx |
+| Serveur applicatif | Debian 13 | Application web interne(Nginx) |
 | Connecteur ZTNA | Debian 13 ou Ubuntu Server | Twingate Connector |
 | Microsegmentation | Windows Defender Firewall et nftables | Filtrage des communications entre serveurs |
 
-Stormshield est le pare-feu réseau de référence. FortiGate sera utilisé dans des expérimentations ciblées, sans être systématiquement placé dans le chemin réseau principal. Les prérequis et limites des offres gratuites seront vérifiés avant déploiement.
+
 
 ## 🔄 Parcours d’accès ZTNA
 
