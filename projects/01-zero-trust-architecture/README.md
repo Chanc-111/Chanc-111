@@ -61,7 +61,7 @@ Le ZTNA ne remplace ni les permissions applicatives, ni les ACL réseau, ni les 
 | Émulation réseau | EVE-NG | Construction de la topologie |
 | Virtualisation | VMware Workstation | Hébergement des machines virtuelles |
 | Annuaire et DNS | Windows Server 2022 | AD DS et DNS |
-| Serveur de fichiers cible | Windows Server 2022 | SMB, permissions NTFS et groupes AD |
+| Serveur de fichiers | Windows Server 2022 | SMB, permissions NTFS et groupes AD |
 | Serveur applicatif | Debian 13 | Application web interne(Nginx) |
 | Connecteur ZTNA | Debian 13 ou Ubuntu Server | Twingate Connector |
 | Microsegmentation | Windows Defender Firewall et nftables | Filtrage des communications entre serveurs |
