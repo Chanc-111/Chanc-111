@@ -6,7 +6,7 @@
 À la suite d’un incident impliquant l’utilisation frauduleuse d’identifiants VPN dérobés, une entreprise de taille intermédiaire souhaite renforcer la sécurité de son système d’information **on-premises**.
 
 L’objectif est de faire évoluer progressivement l’architecture vers une approche Zero Trust en :
-- vérifiant les accès selon l’identité et le contexte, dans la mesure des capacités de la solution retenue ;
+- vérifiant les accès selon l’identité de l'utilisateur, le contexte et la posture de sécurité de l'appareil utilisé;
 - appliquant le principe du moindre privilège ;
 - limitant les communications entre systèmes aux seuls flux nécessaires, grâce à la microsegmentation.
 
