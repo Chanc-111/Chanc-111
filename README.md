@@ -18,7 +18,8 @@ Ce GitHub est mon espace de partage : j'y documente des projets techniques, des 
 
 ## 🚀 Projets
 
-Les projets sont regroupés dans ce repository. Chaque dossier contient la présentation du projet, sa documentation et ses schémas.
+Les projets regroupés dans ce repository s'appuient sur des mises en situations fictives afin de contextualiser les solutions déployées.
+Chaque dossier contient la présentation du projet, sa documentation et ses schémas.
 
 | # | Projet | Description | Statut |
 |---|---|---|---|
