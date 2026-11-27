@@ -88,7 +88,7 @@ Le terminal initie une demande d’accès via le client Twingate. Le plan de con
 
 ## 🧪 Cahier de recette — ZTNA
 
-La première campagne se limite à deux contrôles : l'identité et les autorisations de l'utilisateur, puis la posture de sécurité du terminal.
+La première campagne porte sur trois contrôles complémentaires : l'identité et les autorisations de l'utilisateur, la posture de sécurité du terminal, et l'impossibilité de contourner le ZTNA pour joindre directement une ressource.
 
 | ID | Test | Résultat attendu |
 |---|---|---|
@@ -96,10 +96,13 @@ La première campagne se limite à deux contrôles : l'identité et les autorisa
 | ZTNA-02 | Un utilisateur authentifié, mais non autorisé à accéder à cette ressource, tente une connexion | Accès refusé |
 | ZTNA-03 | Un utilisateur autorisé se connecte depuis un terminal conforme aux critères de sécurité définis | Accès accordé |
 | ZTNA-04 | Le même utilisateur tente d'accéder à la ressource depuis un terminal qui ne respecte pas au moins un critère de sécurité | Accès refusé |
+| ZTNA-05 | Depuis un poste du réseau local, un utilisateur tente de joindre directement une ressource (IP/nom et port du service), sans passer par le client ZTNA | Connexion directe bloquée ; l'accès à la ressource reste possible uniquement via le chemin ZTNA autorisé |
 
-**Point de vigilance :** les critères de posture effectivement disponibles (par exemple, chiffrement du disque, pare-feu ou antivirus) ainsi que leur prise en charge dans l'offre Twingate Starter devront être vérifiés avant l'exécution de ZTNA-03 et ZTNA-04. Si cette fonctionnalité n'est pas incluse dans l'offre retenue, ces deux tests seront adaptés ou reportés ; ils ne seront pas considérés comme réalisés.
+**Point de vigilance — posture :** les critères de posture effectivement disponibles (par exemple, chiffrement du disque, pare-feu ou antivirus) ainsi que leur prise en charge dans l'offre Twingate Starter devront être vérifiés avant l'exécution de ZTNA-03 et ZTNA-04. Si cette fonctionnalité n'est pas incluse dans l'offre retenue, ces deux tests seront adaptés ou reportés ; ils ne seront pas considérés comme réalisés.
 
-Chaque test devra conserver une preuve reproductible : configuration appliquée, identité et état du terminal utilisés, résultat observé et journal correspondant lorsque disponible. Aucun test ne sera déclaré réussi avant son exécution.
+**Point de vigilance — contournement :** ZTNA-05 suppose que les règles réseau et/ou les pare-feux hôtes empêchent les postes utilisateurs d'atteindre directement les ressources publiées. Il faudra notamment vérifier que les flux nécessaires depuis le connecteur restent autorisés, sans ouvrir un accès direct depuis le VLAN utilisateurs. Le simple fait de publier une ressource dans Twingate ne garantit pas, à lui seul, le blocage des chemins réseau alternatifs.
+
+Chaque test devra conserver une preuve reproductible : configuration appliquée, identité et état du terminal utilisés, commande ou tentative de connexion, résultat observé et journal correspondant lorsque disponible. Aucun test ne sera déclaré réussi avant son exécution.
 
 ## 📌 Avancement
 
