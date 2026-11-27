@@ -93,4 +93,4 @@ La première campagne porte sur trois contrôles complémentaires : l'identité 
 
 L’architecture existante a été mise en place et sert de base de référence au projet. L’architecture cible est actuellement en cours de mise en œuvre. Les configurations et résultats seront documentés au fur et à mesure de l’avancement ; les éléments qui n’ont pas encore été déployés ou testés seront explicitement identifiés comme tels.
 
-**Démarche :** comprendre → concevoir → mettre en œuvre → tester → documenter.
+
