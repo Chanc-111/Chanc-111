@@ -51,7 +51,7 @@ Le ZTNA ne remplace ni les permissions applicatives, ni les ACL réseau, ni les 
 
 [Voir le schéma de l’architecture cible](diagrams/02-target-architecture.mmd)
 
-## 🧰 Technologies et environnement envisagés
+## 🧰 Technologies et environnement 
 
 | Fonction | Technologie | Rôle |
 |---|---|---|
